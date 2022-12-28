@@ -27,6 +27,7 @@ contract ShareHolder is Ownable {
         string name;
         bool isMainTask;
         bool active;
+        uint joinTime;
     }
 
     mapping(address => Task[]) private _mainTasks;
@@ -41,7 +42,8 @@ contract ShareHolder is Ownable {
         address owner,
         string name,
         bool isMainTask,
-        bool active
+        bool active,
+        uint joinTime
     );
 
     event Received(uint256 amount);
@@ -57,7 +59,6 @@ contract ShareHolder is Ownable {
     }
     function withdraw() public onlyOwner returns (bool) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
-        // (bool success, ) = address(msg.sender).call{value: address(this).balance}("");
         (bool success, ) = address(msg.sender).call{value: collectedFee}("");
         require(success, "Transfer failed!");
         emit WithdrawedAll(address(this).balance, block.timestamp);
@@ -78,14 +79,11 @@ contract ShareHolder is Ownable {
         return _sharesMainTask[address_].length;
     }
     /* SHARE LISTING */
-    function myBalance() public view returns (uint256) {
-        return msg.sender.balance;
-    }
     /* MAIN TASKS */
-    function addMainTask(string memory name_) public returns (bool result){
+    function addMainTask(string memory name_, uint joinTime) public returns (bool result){
         _taskID++;
-        _mainTasks[msg.sender].push(Task(_mainTaskCounter.current(), address(msg.sender), name_, true, true));
-        emit MainTaskCreated(_mainTaskCounter.current(), address(msg.sender), name_, true, true);
+        _mainTasks[msg.sender].push(Task(_mainTaskCounter.current(), address(msg.sender), name_, true, true, joinTime));
+        emit MainTaskCreated(_mainTaskCounter.current(), address(msg.sender), name_, true, true, joinTime);
         _mainTaskCounter.increment();
         return (true);
     }
@@ -109,6 +107,7 @@ contract ShareHolder is Ownable {
     }
     function addShareHolderToMainTask(uint mainTaskID, address shareHolderAddress, uint256 shareHoldingAmount) public payable returns (bool) {
         Task storage _task = _mainTasks[msg.sender][mainTaskID];
+        require(_task.owner != shareHolderAddress, "Task owner cannot be a shareholder at the same time!");
         require(msg.value >= shareHoldingAmount.mul(110).div(100), "You don't have enough ETH!");
         require(_task.owner == msg.sender, "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
@@ -120,6 +119,12 @@ contract ShareHolder is Ownable {
     }
     /* MAIN TASKS */
 
+    /* MAIN TASKS - TIME CHECKER */
+    function checkIfTimePassed(address address_, uint mainTaskID) public view returns (bool) {
+        require(_mainTasks[address_].length > 0, "Does not exist!");
+        return _mainTasks[address_][mainTaskID].joinTime < block.timestamp;
+    }
+    /* MAIN TASKS - TIME CHECKER */
     // function addSubTask(uint mainTaskID, string memory name_) public {
     //     require(_mainTasks[msg.sender].length > 0, "Does not exist!");
     //     require(_mainTasks[msg.sender][mainTaskID].owner == msg.sender, "MainTask does not exist!");
