@@ -122,9 +122,10 @@ contract ShareHolder is Ownable {
     /* MAIN TASKS - TIME CHECKER */
     function checkIfTimePassed(address address_, uint mainTaskID) public view returns (bool) {
         require(_mainTasks[address_].length > 0, "Does not exist!");
-        return _mainTasks[address_][mainTaskID].joinTime < block.timestamp;
+        return _mainTasks[address_][mainTaskID].joinTime < block.timestamp + 10 minutes;
     }
     /* MAIN TASKS - TIME CHECKER */
+    
     // function addSubTask(uint mainTaskID, string memory name_) public {
     //     require(_mainTasks[msg.sender].length > 0, "Does not exist!");
     //     require(_mainTasks[msg.sender][mainTaskID].owner == msg.sender, "MainTask does not exist!");
