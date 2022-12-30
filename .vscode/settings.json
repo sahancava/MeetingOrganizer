@@ -1,7 +1,0 @@
-{
-    "solidity.packageDefaultDependenciesContractsDirectory": "/Users/sahanc/Desktop/portfolio/shadi/shareholder_accessor/node_modules",
-    "solidity.remappings": [
-        "@openzeppelin/=node_modules/@openzeppelin/"
-    ],
-    "solidity.defaultCompiler": "localNodeModule"
-}
