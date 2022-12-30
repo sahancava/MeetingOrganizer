@@ -59,7 +59,7 @@ contract ShareHolder is Ownable {
     }
     function withdraw() public onlyOwner returns (bool) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
-        (bool success, ) = address(msg.sender).call{value: collectedFee}("");
+        (bool success, ) = address(msg.sender).call{ value: collectedFee }("");
         require(success, "Transfer failed!");
         emit WithdrawedAll(address(this).balance, block.timestamp);
         collectedFee = 0;
