@@ -54,7 +54,7 @@ contract ShareHolder is Ownable {
 
     /* WITHDRAW */
     uint256 private collectedFee;
-    function queryCollectedFee() public view returns (uint256) {
+    function queryCollectedFee() public onlyOwner view returns (uint256) {
         return collectedFee;
     }
     function withdraw() public onlyOwner returns (bool) {
