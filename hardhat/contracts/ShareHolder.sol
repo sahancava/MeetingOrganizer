@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >= 0.8.0 < 0.9.0;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -54,7 +54,7 @@ contract ShareHolder is Ownable {
 
     /* WITHDRAW */
     uint256 private collectedFee;
-    function queryCollectedFee() public view onlyOwner returns (uint256) {
+    function queryCollectedFee() public view returns (uint256) {
         return collectedFee;
     }
     function withdraw() public onlyOwner returns (bool) {
