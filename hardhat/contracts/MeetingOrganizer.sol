@@ -3,13 +3,13 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+// import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract MeetingOrganizer is Ownable {
 
     uint private _taskID;
     using Counters for Counters.Counter;
-    using SafeMath for uint;
+    // using SafeMath for uint;
 
     Counters.Counter public _mainTaskCounter;
     Counters.Counter public _subTaskCounter;
@@ -109,12 +109,13 @@ contract MeetingOrganizer is Ownable {
         Task storage _task = _mainTasks[msg.sender][mainTaskID];
         // below will be changed
         require(_task.owner != attendeeAddress, "Task owner cannot be a attendee at the same time!");
-        require(msg.value >= attendeeAmount.mul(110).div(100), "You don't have enough ETH!");
+        // require(msg.value >= attendeeAmount.mul(110).div(100), "You don't have enough ETH!");
+        require(msg.value >= attendeeAmount * 110 / 100, "You don't have enough ETH!");
         require(_task.owner == msg.sender, "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
         require(attendeeAddress != address(0) && attendeeAddress != address(0x0) && attendeeAddress != address(0xdEaD), "Attendee address cannot be zero or dead address!");
         _attendeesMainTask[attendeeAddress].push(Attendee(mainTaskID, attendeeAddress, attendeeAmount, true));
-        collectedFee += attendeeAmount.mul(100).div(1000);
+        collectedFee += attendeeAmount * 100 / 1000;
         emit AttendeeAddedToMainTask(mainTaskID, attendeeAddress, attendeeAmount, true);
         return true;
     }
