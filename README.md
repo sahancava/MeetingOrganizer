@@ -1,5 +1,5 @@
-# ShareHolder Accessor
+# MeetingOrganizer Smart Contract
 
-This project is being developed in the purpose of managing the 'ShareHolder' smart contract in both task creator and shareholder perspective.
+This project is being developed in the purpose of managing the 'MeetingOrganizer' smart contract in both task creator and attendee perspective.
 
-[ShareHolder Contract](https://github.com/sahancava/shareholder_accessor/blob/master/contracts/ShareHolder.sol)
+[MeetingOrganizer](https://github.com/sahancava/MeetingOrganizer/blob/master/hardhat/contracts/MeetingOrganizer.sol)
