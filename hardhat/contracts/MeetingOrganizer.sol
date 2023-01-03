@@ -15,7 +15,7 @@ contract MeetingOrganizer is Ownable {
     Counters.Counter public _subTaskCounter;
 
     struct Attendee {
-        uint taskIDs;
+        uint taskID;
         address address_;
         uint256 attendeeAmount;
         bool active;
