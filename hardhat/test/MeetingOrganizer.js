@@ -2,10 +2,10 @@ const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-describe('ShareHolder Contract Deployment', function () {
+describe('MeetingOrganizer Contract Deployment', function () {
     async function deployTokenFixture() {
         const [owner, addr1] = await ethers.getSigners();
-        const Contract = await ethers.getContractFactory('ShareHolder');
+        const Contract = await ethers.getContractFactory('MeetingOrganizer');
         const hardhatContract = await Contract.deploy();
         return { owner, addr1, hardhatContract, Contract };
     }

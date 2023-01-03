@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract ShareHolder is Ownable {
+contract MeetingOrganizer is Ownable {
 
     uint private _taskID;
     using Counters for Counters.Counter;
@@ -14,10 +14,10 @@ contract ShareHolder is Ownable {
     Counters.Counter public _mainTaskCounter;
     Counters.Counter public _subTaskCounter;
 
-    struct Shares {
+    struct Attendee {
         uint taskID;
         address address_;
-        uint256 shareHoldingAmount;
+        uint256 attendeeAmount;
         bool active;
     }
 
@@ -32,8 +32,8 @@ contract ShareHolder is Ownable {
 
     mapping(address => Task[]) private _mainTasks;
     mapping(uint => mapping(address => Task[])) private _subTasks;
-    mapping(address => Shares[]) private _sharesMainTask;
-    mapping(address => Shares[]) private _sharesSubTask;
+    mapping(address => Attendee[]) private _attendeesMainTask;
+    mapping(address => Attendee[]) private _attendeesSubTask;
     mapping(address => uint256) balances;
 
     /* EVENTS */
@@ -48,7 +48,7 @@ contract ShareHolder is Ownable {
 
     event Received(uint256 amount);
     event MainTaskDeactivated(uint id, uint256 timestamp);
-    event ShareHolderAddedToMainTask(uint taskID, address address_, uint256 shareHoldingAmount, bool active);
+    event AttendeeAddedToMainTask(uint taskID, address address_, uint256 attendeeAmount, bool active);
     event WithdrawedAll(uint256 amount, uint256 time);
     /* EVENTS */
 
@@ -67,18 +67,18 @@ contract ShareHolder is Ownable {
     }
     /* WITHDRAW */
     
-    /* SHARE LISTING */
-    function getMainShares(address address_) public view returns (Shares[] memory) {
-        return _sharesMainTask[address_];
+    /* ATTENDEE LISTING */
+    function getMainAttendees(address address_) public view returns (Attendee[] memory) {
+        return _attendeesMainTask[address_];
     }
-    function getSingleMainShares(address address_, uint mainTaskID) public view returns (Shares memory) {
-        require(_sharesMainTask[address_].length > 0, "Does not exist!");
-        return _sharesMainTask[address_][mainTaskID];
+    function getSingleMainAttendee(address address_, uint mainTaskID) public view returns (Attendee memory) {
+        require(_attendeesMainTask[address_].length > 0, "Does not exist!");
+        return _attendeesMainTask[address_][mainTaskID];
     }
-    function getAmountOfMainShares(address address_) public view returns (uint) {
-        return _sharesMainTask[address_].length;
+    function getAmountOfMainAttendee(address address_) public view returns (uint) {
+        return _attendeesMainTask[address_].length;
     }
-    /* SHARE LISTING */
+    /* ATTENDEE LISTING */
     /* MAIN TASKS */
     function addMainTask(string memory name_, uint joinTime) public returns (bool result){
         _taskID++;
@@ -105,16 +105,17 @@ contract ShareHolder is Ownable {
         emit MainTaskDeactivated(mainTaskID, block.timestamp);
         return true;
     }
-    function addShareHolderToMainTask(uint mainTaskID, address shareHolderAddress, uint256 shareHoldingAmount) public payable returns (bool) {
+    function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public payable returns (bool) {
         Task storage _task = _mainTasks[msg.sender][mainTaskID];
-        require(_task.owner != shareHolderAddress, "Task owner cannot be a shareholder at the same time!");
-        require(msg.value >= shareHoldingAmount.mul(110).div(100), "You don't have enough ETH!");
+        // below will be changed
+        require(_task.owner != attendeeAddress, "Task owner cannot be a attendee at the same time!");
+        require(msg.value >= attendeeAmount.mul(110).div(100), "You don't have enough ETH!");
         require(_task.owner == msg.sender, "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
-        require(shareHolderAddress != address(0) && shareHolderAddress != address(0x0) && shareHolderAddress != address(0xdEaD), "Shareholder address cannot be zero or dead address!");
-        _sharesMainTask[shareHolderAddress].push(Shares(mainTaskID, shareHolderAddress, shareHoldingAmount, true));
-        collectedFee += shareHoldingAmount.mul(100).div(1000);
-        emit ShareHolderAddedToMainTask(mainTaskID, shareHolderAddress, shareHoldingAmount, true);
+        require(attendeeAddress != address(0) && attendeeAddress != address(0x0) && attendeeAddress != address(0xdEaD), "Attendee address cannot be zero or dead address!");
+        _attendeesMainTask[attendeeAddress].push(Attendee(mainTaskID, attendeeAddress, attendeeAmount, true));
+        collectedFee += attendeeAmount.mul(100).div(1000);
+        emit AttendeeAddedToMainTask(mainTaskID, attendeeAddress, attendeeAmount, true);
         return true;
     }
     /* MAIN TASKS */
