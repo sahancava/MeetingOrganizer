@@ -1,14 +1,22 @@
-const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
-const { expect } = require('chai');
-const { ethers } = require('hardhat');
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { Contract } from 'ethers';
 
 describe('MeetingOrganizer Contract Deployment', function () {
+    let hardhatContract: Contract;
+
+    beforeEach(async () => {
+        console.log("################################################################################");
+    })
+    
     async function deployTokenFixture() {
         const [owner, addr1] = await ethers.getSigners();
         const Contract = await ethers.getContractFactory('MeetingOrganizer');
-        const hardhatContract = await Contract.deploy();
+        hardhatContract = await Contract.deploy();
         return { owner, addr1, hardhatContract, Contract };
     }
+
     describe('After deployment init checks', function () {
         it('Should set the right owner', async function () {
             const { hardhatContract, owner } = await loadFixture(deployTokenFixture);
