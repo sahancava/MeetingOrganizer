@@ -54,7 +54,7 @@ contract MeetingOrganizer is Ownable {
 
     /* WITHDRAW */
     uint256 private collectedFee;
-    function queryCollectedFee() public onlyOwner view returns (uint256) {
+    function queryCollectedFee() public view onlyOwner returns (uint256) {
         return collectedFee;
     }
     function withdraw() public onlyOwner returns (bool) {
@@ -66,7 +66,7 @@ contract MeetingOrganizer is Ownable {
         return true;
     }
     /* WITHDRAW */
-    
+
     /* ATTENDEE LISTING */
     function getMainAttendees(address address_) public view returns (Attendee[] memory) {
         return _attendeesMainTask[address_];
