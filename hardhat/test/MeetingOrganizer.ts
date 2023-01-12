@@ -16,23 +16,28 @@ describe('MeetingOrganizer Contract Deployment', function () {
         owner = _owner;
         addr1 = _addr1;
     })
-    
+
     before(async () => {
         console.log('\n')
     })
 
-    describe('########## ---> Contract Ownership <--- ##########', function () {
+    describe('########## ---> Contract Ownership <--- ###################################', function () {
+        
+        // Below `after` can be commented.
         after(async () => { 
             console.log('\t\tHardhat Owner: ', await hardhatContract.owner())
             console.log('\t\tContract Owner: ', owner.address)
             console.log('\n')
         })
+
         it('Should set the right owner', async function () {
             expect(await hardhatContract.owner()).to.equal(owner.address);
         })
     })
 
     describe('########## ---> Collected Fee and Withdraw Function Testing <--- ##########', function () {
+
+        // Below `afterEach` and `afterAll` can be commented
         this.afterEach(async () => {
             counter++;
             switch (counter) {
@@ -51,6 +56,7 @@ describe('MeetingOrganizer Contract Deployment', function () {
         this.afterAll(async () => {
             counter = 0;
         })
+
         it('Collected fee amount should equal to zero', async function () {
             collectedFee = await hardhatContract.queryCollectedFee()
             expect(collectedFee).to.equal(Number(ethers.BigNumber.from(0)))
