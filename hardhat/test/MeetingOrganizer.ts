@@ -23,13 +23,13 @@ describe('MeetingOrganizer Contract Deployment', function () {
 
     describe('########## ---> Contract Ownership <--- ###################################', function () {
         
-        // Below `after` can be commented.
-        after(async () => { 
-            console.log('\t\tHardhat Owner: ', await hardhatContract.owner())
-            console.log('\t\tContract Owner: ', owner.address)
-            console.log('\n')
-        })
-
+        // --> Below `after` can be uncommented.
+        // after(async () => { 
+        //     console.log('\t\tHardhat Owner: ', await hardhatContract.owner())
+        //     console.log('\t\tContract Owner: ', owner.address)
+        //     console.log('\n')
+        // })
+        
         it('Should set the right owner', async function () {
             expect(await hardhatContract.owner()).to.equal(owner.address);
         })
@@ -37,25 +37,25 @@ describe('MeetingOrganizer Contract Deployment', function () {
 
     describe('########## ---> Collected Fee and Withdraw Function Testing <--- ##########', function () {
 
-        // Below `afterEach` and `afterAll` can be commented
-        this.afterEach(async () => {
-            counter++;
-            switch (counter) {
-                case 1:
-                    console.log('\t\tCollected Amount: ', collectedFee.toString())
-                    break;
-                case 2:
-                    console.log('\t\tContract Owner: ', owner.address)
-                    console.log('\t\tFunction Caller: ', addr1.address)
-                    break;
-                case 3:
-                    console.log('\t\tCollected Amount: ', collectedFee.toString())
-                    break;
-            }
-        })
-        this.afterAll(async () => {
-            counter = 0;
-        })
+        // --> Below `afterEach` and `afterAll` can be commented
+        // this.afterEach(async () => {
+        //     counter++;
+        //     switch (counter) {
+        //         case 1:
+        //             console.log('\t\tCollected Amount: ', collectedFee.toString())
+        //             break;
+        //         case 2:
+        //             console.log('\t\tContract Owner: ', owner.address)
+        //             console.log('\t\tFunction Caller: ', addr1.address)
+        //             break;
+        //         case 3:
+        //             console.log('\t\tCollected Amount: ', collectedFee.toString())
+        //             break;
+        //     }
+        // })
+        // this.afterAll(async () => {
+        //     counter = 0;
+        // })
 
         it('Collected fee amount should equal to zero', async function () {
             collectedFee = await hardhatContract.queryCollectedFee()
