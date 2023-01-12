@@ -23,8 +23,6 @@ describe('MeetingOrganizer Contract Deployment', function () {
         
         // --> Below `after` can be commented.
         after(async () => { 
-            console.log('\tHardhat Owner: ', await hardhatContract.owner())
-            console.log('\tContract Owner: ', owner.address)
             console.log('\n')
         })
         
@@ -92,19 +90,20 @@ describe('MeetingOrganizer Contract Deployment', function () {
             expect(task.owner).to.equal(taskOwner);
         });
         it('Should add an attendee to a main task', async function () {
-            const taskName = 'Task 4';
-            const joinTime = Date.now();
-            await hardhatContract.addMainTask(taskName,joinTime);
-            const attendeeAddress = addr1.address;
+            await hardhatContract.addMainTask('Task 1', Date.now());
             const attendeeAmount = ethers.utils.parseEther('1');
-            await hardhatContract.addAttendee(0, attendeeAddress, attendeeAmount);
-            const attendees = await hardhatContract.getMainAttendees(attendeeAddress);
+            const tx = await hardhatContract.addAttendeeToMainTask(0, addr1.address, attendeeAmount, {value: attendeeAmount.mul(110).div(100)});
+            const receipt = await tx.wait();
+            expect(receipt.events[0].event).to.equal('AttendeeAddedToMainTask');
+            expect(receipt.events[0].args.taskID.eq(0)).to.be.true;
+            expect(receipt.events[0].args.address_).to.equal(addr1.address);
+            expect(receipt.events[0].args.attendeeAmount).to.equal(attendeeAmount);
+            const attendees = await hardhatContract.getMainAttendees(addr1.address);
             expect(attendees.length).to.equal(1);
-            const attendee = attendees[0];
-            expect(attendee.taskID).to.equal(0);
-            expect(attendee.address_).to.equal(attendeeAddress);
-            expect(attendee.attendeeAmount).to.equal(attendeeAmount);
-            expect(attendee.active).to.be.true;
+            expect(attendees[0].taskID).to.equal(receipt.events[0].args.taskID);
+            expect(attendees[0].address_).to.equal(addr1.address);
+            expect(attendees[0].attendeeAmount).to.equal(receipt.events[0].args.attendeeAmount);
+            expect(attendees[0].active).to.be.true;
         });
         
     })
