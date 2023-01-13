@@ -5,9 +5,13 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract MeetingOrganizer is Ownable {
+abstract contract MeetingOrganizerAbstract {
+    function addMainTask(string memory name_, uint joinTime) external virtual returns (bool);
+}
 
-    uint private _taskID;
+contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
+
+    // uint private _taskID;
     using Counters for Counters.Counter;
     using SafeMath for uint;
 
@@ -35,6 +39,11 @@ contract MeetingOrganizer is Ownable {
     mapping(address => Attendee[]) private _attendeesMainTask;
     mapping(address => Attendee[]) private _attendeesSubTask;
     mapping(address => uint256) balances;
+
+    mapping(address => uint) public taskCount;
+    mapping(address => uint) public lastTaskCreationTime;
+
+    uint public constant TIME_LIMIT = 60;
 
     /* MODIFIERS */
     bool internal locked;
@@ -71,7 +80,7 @@ contract MeetingOrganizer is Ownable {
         require(collectedFee > 0, "There is no collected fee in the contract!");
         (bool success, ) = address(msg.sender).call{ value: collectedFee }("");
         require(success, "Transfer failed!");
-        emit WithdrawedAll(address(this).balance, block.timestamp);
+        emit WithdrawedAll(collectedFee, block.timestamp);
         collectedFee = 0;
         return true;
     }
@@ -90,11 +99,14 @@ contract MeetingOrganizer is Ownable {
     }
     /* ATTENDEE LISTING */
     /* MAIN TASKS */
-    function addMainTask(string memory name_, uint joinTime) public noReentrant() returns (bool result){
-        _taskID++;
+    function addMainTask(string memory name_, uint joinTime) external override noReentrant() returns (bool result){
+        // _taskID++;
+        require(block.timestamp - lastTaskCreationTime[msg.sender] > TIME_LIMIT, "You should wait at least 60 seconds before try to create another main task!");
         _mainTasks[msg.sender].push(Task(_mainTaskCounter.current(), address(msg.sender), name_, true, true, joinTime));
         emit MainTaskCreated(_mainTaskCounter.current(), address(msg.sender), name_, true, true, joinTime);
         _mainTaskCounter.increment();
+        taskCount[msg.sender]++;
+        lastTaskCreationTime[msg.sender] = block.timestamp;
         return (true);
     }
     function getMainTasks(address address_) public view returns (Task[] memory) {
