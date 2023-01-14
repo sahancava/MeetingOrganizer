@@ -107,7 +107,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
         _mainTaskCounter.increment();
         taskCount[msg.sender]++;
         lastTaskCreationTime[msg.sender] = block.timestamp;
-        return (true);
+        return true;
     }
     function getMainTasks(address address_) public view returns (Task[] memory) {
         return _mainTasks[address_];
