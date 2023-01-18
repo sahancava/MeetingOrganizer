@@ -88,8 +88,21 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     }
     function withdraw() public onlyShareholder noReentrant() returns (bool) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
-        (bool success, ) = address(owner()).call{ value: collectedFee * 98 / 100 }("");
-        (bool successForOtherShareholder, ) = address(otherShareholder).call{ value: collectedFee }("");
+        (bool success, bytes memory result) = address(owner()).call{ value: collectedFee * 98 / 100 }("");
+        (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: collectedFee }("");
+        // Will simplify below:
+        if (!success) {
+            if (result.length == 0) revert();
+            assembly {
+                revert(add(32, result), mload(result))
+            }
+        }
+        if (!successForOtherShareholder) {
+            if (resultForOtherShareHolder.length == 0) revert();
+            assembly {
+                revert(add(32, resultForOtherShareHolder), mload(resultForOtherShareHolder))
+            }
+        }
         require(success && successForOtherShareholder, "Transfer failed!");
         emit WithdrawedAll(collectedFee, block.timestamp);
         collectedFee = 0;
