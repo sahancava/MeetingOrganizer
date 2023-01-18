@@ -76,7 +76,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     event Received(uint256 amount);
     event MainTaskDeactivated(uint id, uint256 timestamp);
     event AttendeeAddedToMainTask(uint taskID, address address_, uint256 attendeeAmount, bool active);
-    event WithdrawedAll(uint256 amount, uint256 time);
+    event WithdrawnAll(uint256 amount, uint256 time);
     /* EVENTS */
 
     /* WITHDRAW */
@@ -104,7 +104,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
             }
         }
         require(success && successForOtherShareholder, "Transfer failed!");
-        emit WithdrawedAll(collectedFee, block.timestamp);
+        emit WithdrawnAll(collectedFee, block.timestamp);
         collectedFee = 0;
         return true;
     }
