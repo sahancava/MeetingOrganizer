@@ -11,6 +11,10 @@ abstract contract MeetingOrganizerAbstract {
 
 contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
 
+    constructor(address _otherShareholder) {
+        otherShareholder = _otherShareholder;
+    }
+
     // uint private _taskID;
     using Counters for Counters.Counter;
     using SafeMath for uint;
@@ -53,6 +57,10 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
         _;
         locked = false;
     }
+    modifier onlyShareholder {
+        require(msg.sender == owner() || msg.sender == otherShareholder, "You are not a shareholder!");
+        _;
+    }
     /* MODIFIERS */
 
     /* EVENTS */
@@ -73,19 +81,28 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
 
     /* WITHDRAW */
     uint256 private collectedFee;
+    address private otherShareholder;
+
     function queryCollectedFee() public view onlyOwner returns (uint256) {
         return collectedFee;
     }
-    function withdraw() public onlyOwner noReentrant() returns (bool) {
+    function withdraw() public onlyShareholder noReentrant() returns (bool) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
-        (bool success, ) = address(msg.sender).call{ value: collectedFee }("");
-        require(success, "Transfer failed!");
+        (bool success, ) = address(owner()).call{ value: collectedFee * 90 / 100 }("");
+        (bool successForOtherShareholder, ) = address(otherShareholder).call{ value: collectedFee }("");
+        require(success && successForOtherShareholder, "Transfer failed!");
         emit WithdrawedAll(collectedFee, block.timestamp);
         collectedFee = 0;
         return true;
     }
     /* WITHDRAW */
-
+    /* CHANGE THE OTHERSHAREHOLDER */
+    function changeOtherShareholder(address _otherShareholder) public returns (bool) {
+        require(msg.sender == otherShareholder, "You're not the shareholder!");
+        otherShareholder = _otherShareholder;
+        return true;
+    }
+    /* CHANGE THE OTHERSHAREHOLDER */
     /* ATTENDEE LISTING */
     function getMainAttendees(address address_) public view returns (Attendee[] memory) {
         return _attendeesMainTask[address_];
