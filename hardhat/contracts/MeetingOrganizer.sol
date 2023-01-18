@@ -58,7 +58,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
         locked = false;
     }
     modifier onlyShareholder {
-        require(msg.sender == owner() || msg.sender == otherShareholder, "You are not a shareholder!");
+        require(_msgSender() == owner() || _msgSender() == otherShareholder, "You are not a shareholder!");
         _;
     }
     /* MODIFIERS */
@@ -98,7 +98,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     /* WITHDRAW */
     /* CHANGE THE OTHERSHAREHOLDER */
     function changeOtherShareholder(address _otherShareholder) public returns (bool) {
-        require(msg.sender == otherShareholder, "You're not the shareholder!");
+        require(_msgSender() == otherShareholder, "You're not the shareholder!");
         otherShareholder = _otherShareholder;
         return true;
     }
@@ -118,12 +118,12 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     /* MAIN TASKS */
     function addMainTask(string memory name_, uint joinTime) external override noReentrant() returns (bool result){
         // _taskID++;
-        require(block.timestamp - lastTaskCreationTime[msg.sender] > TIME_LIMIT, "You should wait at least 60 seconds before try to create another main task!");
-        _mainTasks[msg.sender].push(Task(_mainTaskCounter.current(), address(msg.sender), name_, true, true, joinTime));
-        emit MainTaskCreated(_mainTaskCounter.current(), address(msg.sender), name_, true, true, joinTime);
+        require(block.timestamp - lastTaskCreationTime[_msgSender()] > TIME_LIMIT, "You should wait at least 60 seconds before try to create another main task!");
+        _mainTasks[_msgSender()].push(Task(_mainTaskCounter.current(), address(_msgSender()), name_, true, true, joinTime));
+        emit MainTaskCreated(_mainTaskCounter.current(), address(_msgSender()), name_, true, true, joinTime);
         _mainTaskCounter.increment();
-        taskCount[msg.sender]++;
-        lastTaskCreationTime[msg.sender] = block.timestamp;
+        taskCount[_msgSender()]++;
+        lastTaskCreationTime[_msgSender()] = block.timestamp;
         return true;
     }
     function getMainTasks(address address_) public view returns (Task[] memory) {
@@ -137,19 +137,19 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
         return _mainTasks[address_].length;
     }
     function deactivateTheMainTask(uint mainTaskID) public noReentrant() returns (bool) {
-        Task storage _task = _mainTasks[msg.sender][mainTaskID];
-        require(_task.owner == msg.sender, "You are not the owner of the main task!");
+        Task storage _task = _mainTasks[_msgSender()][mainTaskID];
+        require(_task.owner == _msgSender(), "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
         _task.active = false;
         emit MainTaskDeactivated(mainTaskID, block.timestamp);
         return true;
     }
     function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public noReentrant() payable returns (bool) {
-        Task storage _task = _mainTasks[msg.sender][mainTaskID];
+        Task storage _task = _mainTasks[_msgSender()][mainTaskID];
         // below will be changed
         require(_task.owner != attendeeAddress, "Task owner cannot be a attendee at the same time!");
         require(msg.value >= attendeeAmount.mul(110).div(100), "You don't have enough ETH!");
-        require(_task.owner == msg.sender, "You are not the owner of the main task!");
+        require(_task.owner == _msgSender(), "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
         require(attendeeAddress != address(0) && attendeeAddress != address(0x0) && attendeeAddress != address(0xdEaD), "Attendee address cannot be zero or dead address!");
         _attendeesMainTask[attendeeAddress].push(Attendee(mainTaskID, attendeeAddress, attendeeAmount, true));
@@ -167,20 +167,20 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     /* MAIN TASKS - TIME CHECKER */
     
     // function addSubTask(uint mainTaskID, string memory name_) public {
-    //     require(_mainTasks[msg.sender].length > 0, "Does not exist!");
-    //     require(_mainTasks[msg.sender][mainTaskID].owner == msg.sender, "MainTask does not exist!");
-    //     _subTasks[mainTaskID][msg.sender].push(Task(_subTaskCounter.current(), msg.sender, name_, false, true));
+    //     require(_mainTasks[_msgSender()].length > 0, "Does not exist!");
+    //     require(_mainTasks[_msgSender()][mainTaskID].owner == _msgSender(), "MainTask does not exist!");
+    //     _subTasks[mainTaskID][_msgSender()].push(Task(_subTaskCounter.current(), _msgSender(), name_, false, true));
     // }
 
     // function addShareHolderToMainTask(uint mainTaskID, address address_, uint256 sharePercentage) public {
-    //     require(_mainTasks[msg.sender][mainTaskID].owner == msg.sender, "MainTask does not exist!");
+    //     require(_mainTasks[_msgSender()][mainTaskID].owner == _msgSender(), "MainTask does not exist!");
     //     require(address_ != address(0x0), "Address is not valid.");
     //     require(sharePercentage > 0 && sharePercentage < 100, "Share percentage must be between 0 and 100.");
     //     _sharesMainTask[address_].push(Shares(mainTaskID, address_, sharePercentage));
     // }
 
     // function addShareHolderToSubTask(uint mainTaskID, uint subTaskID, address address_, uint256 sharePercentage) public {
-    //     require(_subTasks[mainTaskID][msg.sender][subTaskID].owner == msg.sender, "SubTask does not exist!");
+    //     require(_subTasks[mainTaskID][_msgSender()][subTaskID].owner == _msgSender(), "SubTask does not exist!");
     //     require(address_ != address(0x0), "Address is not valid.");
     //     require(sharePercentage > 0 && sharePercentage < 100, "Share percentage must be between 0 and 100.");
     //     _sharesSubTask[address_].push(Shares(subTaskID, address_, sharePercentage));
