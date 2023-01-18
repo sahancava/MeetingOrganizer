@@ -10,7 +10,7 @@ describe('MeetingOrganizer Contract Deployment', function () {
     this.beforeEach(async () => {
         const [_owner, _addr1] = await ethers.getSigners();
         const Contract = await ethers.getContractFactory('MeetingOrganizer');
-        hardhatContract = await Contract.deploy('0x8a5472379978D186571f58f82697d845d7b26515');
+        hardhatContract = await Contract.deploy('0x0000000000000000000000000000000000000000');
         owner = _owner;
         addr1 = _addr1;
     })
