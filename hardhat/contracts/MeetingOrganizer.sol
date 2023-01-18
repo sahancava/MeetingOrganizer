@@ -88,7 +88,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     }
     function withdraw() public onlyShareholder noReentrant() returns (bool) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
-        (bool success, ) = address(owner()).call{ value: collectedFee * 90 / 100 }("");
+        (bool success, ) = address(owner()).call{ value: collectedFee * 98 / 100 }("");
         (bool successForOtherShareholder, ) = address(otherShareholder).call{ value: collectedFee }("");
         require(success && successForOtherShareholder, "Transfer failed!");
         emit WithdrawedAll(collectedFee, block.timestamp);
