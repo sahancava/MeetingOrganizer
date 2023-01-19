@@ -1,55 +1,69 @@
-import './App.css';
-import { useEffect } from 'react'
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { useEffect, useState } from 'react'
+import { Container, Row, Col, Form, InputGroup, Stack, Button, Alert } from 'react-bootstrap';
 import NavMenu from './components/NavMenu';
-
 import tokenAbi from './components/abi/ShareHolder.json';
-import Web3 from 'web3';
 
 function App() {
 
-  const init = async () => {
-    var contractAddress = "xxx";
-    const web3 = new Web3(window.ethereum);
-    const Contract = new web3.eth.Contract(tokenAbi, contractAddress);
-    setTimeout(async () => {
-      const data = await Contract.methods.name().call()
-      console.log('data: ', data)
-    }, 500);
-  }
+  const [walletAddress, setWalletAddress] = useState("");
+
   useEffect(() => {
-    setTimeout(() => {
-      init();
-    }, 1000);
-  })
+    const init = async () => {
+      var contractAddress = "0x0";
+      const method = "eth_requestAccounts";
+      const accounts = await window.ethereum.request({ method })
+      if (accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+      }
+    }
+    init();
+  }, [walletAddress])
+  
   return (
     <div className="App">
       <Container>
         <NavMenu />
-        <Row style={{backgroundColor: 'transparent', marginTop: '2%', border: '1px solid white'}}>
-          <Col>Read Functions</Col>
-          <Col>Write Functions</Col>
-        </Row>
-        <Row style={{backgroundColor: 'transparent', marginTop: '2%', border: '1px solid white'}}>
-          <Col className="col-md-6">
-            <Col className="col-md-12">
-              Read Functions
-            </Col>
-            <Col className="col-md-12">
-              Read Functions
-            </Col>
-          </Col>
-          <Col className="col-md-6">
-            <Col className="col-md-12">
-              Write Functions
-            </Col>
-            <Col className="col-md-12">
-              Write Functions
-            </Col>
-          </Col>
-        </Row>
+        {walletAddress.length > 0
+        ?
+        <Form>
+          <Form.Group className='mb-3'>
+            <Row className='justify-content-xs-center'>
+              <Col xs={12} md={6}>
+                <Alert variant="success">
+                  <Alert.Heading>Check if a particular wallet does have a main task</Alert.Heading>
+                    <p>
+                      Mollit est exercitation consequat sunt magna est sunt duis deserunt tempor irure aliqua. Ea aute irure occaecat quis tempor in occaecat. Cupidatat labore sint minim voluptate irure veniam.
+                    </p>
+                    <hr />
+                    <p className="mb-0">
+                      <Stack direction="horizontal" gap={3}>
+                        <Form.Control className="me-auto" placeholder="Wallet Address" />
+                        <Button variant="secondary">Submit</Button>
+                      </Stack>
+                    </p>
+                </Alert>
+              </Col>
+              <Col xs={12} md={6}>
+                <Alert variant="success">
+                  <Alert.Heading>Check if a particular wallet does have a main task</Alert.Heading>
+                    <p>
+                      Mollit est exercitation consequat sunt magna est sunt duis deserunt tempor irure aliqua. Ea aute irure occaecat quis tempor in occaecat. Cupidatat labore sint minim voluptate irure veniam.
+                    </p>
+                    <hr />
+                    <p className="mb-0">
+                      <Stack direction="horizontal" gap={3}>
+                        <Form.Control className="me-auto" placeholder="Wallet Address" />
+                        <Button variant="secondary">Submit</Button>
+                      </Stack>
+                    </p>
+                </Alert>
+              </Col>
+            </Row>
+          </Form.Group>
+        </Form>
+        :
+        <></>
+        }
       </Container>
     </div>
   );

@@ -1,4 +1,4 @@
-import {useState, useCallback, useEffect} from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import $ from 'jquery';
 import { ConnectButton } from './ConnectButton';
 import Nav from 'react-bootstrap/Nav';
@@ -6,7 +6,7 @@ import Nav from 'react-bootstrap/Nav';
 const NavMenu = () => {
 
     const [selectedAddress, setSelectedAddress] = useState();
-    const addressChanged = useCallback((address: string | undefined) => {
+    const addressChanged = useCallback((address) => {
         setSelectedAddress(address);
     }, []);
 
@@ -41,9 +41,9 @@ const NavMenu = () => {
                             ?
                             <ConnectButton id="connectButton" onChange={addressChanged}/>
                             :
-                            <a id="playTheGameButton" href="/game" role="button" className="neon-button neon-button__3 text-center w-100"
+                            <a id="playTheGameButton" href="https://metamask.io" role="button" className="neon-button neon-button__3 text-center w-100"
                                style={{maxWidth: 500}}
-                            >Play</a>
+                            >Install MetaMask</a>
                     }
                 </div>
           </Nav.Item>

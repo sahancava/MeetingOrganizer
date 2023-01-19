@@ -87,7 +87,7 @@ const ConnectButton = () => {
     const windowOnload = window.onload = (event) => {
         setTimeout(async function () {
             if ((await readAddress()).length > 0) {
-                await checkChain('testnet');
+                await checkChain('mainnet');
                 console.log(`You're connected to: ${await readAddress()}`);
             } else {
                 console.log("Metamask is not connected");
@@ -110,7 +110,7 @@ const ConnectButton = () => {
 
     return (
         <button
-            className="btn btn-primary text-truncate overflow-hidden text-nowrap w-100"
+            className="btn btn-primary text-truncate overflow-hidden text-nowrap w-100 mb-4 mt-4"
             style={{maxWidth: 500}}
             id="walletConnectButton"
             onClick={connectWallet}
