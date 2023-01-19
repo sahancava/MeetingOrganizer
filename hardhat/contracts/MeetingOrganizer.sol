@@ -51,7 +51,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
 
     /* MODIFIERS */
     bool internal locked;
-    modifier noReentrant() {
+    modifier lockCheck {
         require(!locked, "No re-entrancy!");
         locked = true;
         _;
@@ -83,10 +83,10 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     uint256 private collectedFee;
     address private otherShareholder;
 
-    function queryCollectedFee() public view onlyOwner returns (uint256) {
+    function queryCollectedFee() public view onlyShareholder returns (uint256) {
         return collectedFee;
     }
-    function withdraw() public onlyShareholder noReentrant() returns (bool) {
+    function withdraw() public onlyShareholder lockCheck returns (bool) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
         (bool success, bytes memory result) = address(owner()).call{ value: collectedFee * 98 / 100 }("");
         (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: collectedFee }("");
@@ -129,7 +129,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     }
     /* ATTENDEE LISTING */
     /* MAIN TASKS */
-    function addMainTask(string memory name_, uint joinTime) external override noReentrant() returns (bool result){
+    function addMainTask(string memory name_, uint joinTime) external override lockCheck returns (bool result){
         // _taskID++;
         require(block.timestamp - lastTaskCreationTime[_msgSender()] > TIME_LIMIT, "You should wait at least 60 seconds before try to create another main task!");
         _mainTasks[_msgSender()].push(Task(_mainTaskCounter.current(), address(_msgSender()), name_, true, true, joinTime));
@@ -149,7 +149,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     function getAmountOfMainTasks(address address_) public view returns (uint) {
         return _mainTasks[address_].length;
     }
-    function deactivateTheMainTask(uint mainTaskID) public noReentrant() returns (bool) {
+    function deactivateTheMainTask(uint mainTaskID) public lockCheck returns (bool) {
         Task storage _task = _mainTasks[_msgSender()][mainTaskID];
         require(_task.owner == _msgSender(), "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
@@ -157,7 +157,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
         emit MainTaskDeactivated(mainTaskID, block.timestamp);
         return true;
     }
-    function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public noReentrant() payable returns (bool) {
+    function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public lockCheck payable returns (bool) {
         Task storage _task = _mainTasks[_msgSender()][mainTaskID];
         // below will be changed
         require(_task.owner != attendeeAddress, "Task owner cannot be a attendee at the same time!");
