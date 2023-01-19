@@ -77,6 +77,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     event MainTaskDeactivated(uint id, uint256 timestamp);
     event AttendeeAddedToMainTask(uint taskID, address address_, uint256 attendeeAmount, bool active);
     event WithdrawnAll(uint256 amount, uint256 time);
+    event TransferFailed(address to, uint256 amount, uint256 timestamp);
     /* EVENTS */
 
     /* WITHDRAW */
@@ -86,27 +87,25 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     function queryCollectedFee() public view onlyShareholder returns (uint256) {
         return collectedFee;
     }
-    function withdraw() public onlyShareholder lockCheck returns (bool) {
-        require(collectedFee > 0, "There is no collected fee in the contract!");
-        (bool success, bytes memory result) = address(owner()).call{ value: collectedFee * 98 / 100 }("");
-        (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: collectedFee }("");
-        // Will simplify below:
+    function checkSuccess(bool success, bytes memory result, address _to, uint256 _amount, uint256 _timestamp) internal {
+        require(success, "Transfer failed!");
         if (!success) {
             if (result.length == 0) revert();
+            emit TransferFailed(_to, _amount, _timestamp);
             assembly {
                 revert(add(32, result), mload(result))
             }
         }
-        if (!successForOtherShareholder) {
-            if (resultForOtherShareHolder.length == 0) revert();
-            assembly {
-                revert(add(32, resultForOtherShareHolder), mload(resultForOtherShareHolder))
-            }
-        }
-        require(success && successForOtherShareholder, "Transfer failed!");
+    }
+    function withdraw() public onlyShareholder lockCheck returns (uint256) {
+        require(collectedFee > 0, "There is no collected fee in the contract!");
+        (bool success, bytes memory result) = address(owner()).call{ value: collectedFee * 98 / 100 }("");
+        checkSuccess(success, result, address(owner()), (collectedFee * 98 / 100), block.timestamp);
+        (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: collectedFee }("");
+        checkSuccess(successForOtherShareholder, resultForOtherShareHolder, address(otherShareholder), collectedFee, block.timestamp);
         emit WithdrawnAll(collectedFee, block.timestamp);
         collectedFee = 0;
-        return true;
+        return collectedFee;
     }
     /* WITHDRAW */
     /* CHANGE THE OTHERSHAREHOLDER */
