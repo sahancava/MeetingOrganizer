@@ -47,21 +47,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     mapping(address => uint) public taskCount;
     mapping(address => uint) public lastTaskCreationTime;
 
-    uint public constant TIME_LIMIT = 60;
-
-    /* MODIFIERS */
-    bool internal locked;
-    modifier lockCheck {
-        require(!locked, "No re-entrancy!");
-        locked = true;
-        _;
-        locked = false;
-    }
-    modifier onlyShareholder {
-        require(_msgSender() == owner() || _msgSender() == otherShareholder, "You are not a shareholder!");
-        _;
-    }
-    /* MODIFIERS */
+    uint public TIME_LIMIT = 60;
 
     /* EVENTS */
     event MainTaskCreated(
@@ -78,8 +64,30 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     event AttendeeAddedToMainTask(uint taskID, address address_, uint256 attendeeAmount, bool active);
     event WithdrawnAll(uint256 amount, uint256 time);
     event TransferFailed(address to, uint256 amount, uint256 timestamp);
+    event TimeLimitChanged(uint oldTimeLimit, uint newTimeLimit);
     /* EVENTS */
+    /* MODIFIERS */
+    bool internal locked;
+    modifier lockCheck {
+        require(!locked, "No re-entrancy!");
+        locked = true;
+        _;
+        locked = false;
+    }
+    modifier onlyShareholder {
+        require(_msgSender() == owner() || _msgSender() == otherShareholder, "You are not a shareholder!");
+        _;
+    }
+    /* MODIFIERS */
 
+    /* TIME_LIMIT CHANGE */
+    function changeTimeLimit(uint _newTimeLimit) public onlyOwner {
+        require(_newTimeLimit >= 60 && _newTimeLimit <=600, "New TIME_LIMIT should be between (including) 60 and 600 seconds!");
+        uint oldTimeLimit = TIME_LIMIT;
+        TIME_LIMIT = _newTimeLimit;
+        emit TimeLimitChanged(oldTimeLimit, TIME_LIMIT);
+    }
+    /* TIME_LIMIT CHANGE */
     /* WITHDRAW */
     uint256 private collectedFee;
     address private otherShareholder;
