@@ -39,14 +39,13 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract, ReentrancyGuard 
         uint joinTime;
     }
 
+    mapping(address => uint) public taskCount;
+    mapping(address => uint) public lastTaskCreationTime;
+    mapping(address => uint256) balances;
     mapping(address => Task[]) private _mainTasks;
     mapping(uint => mapping(address => Task[])) private _subTasks;
     mapping(address => Attendee[]) private _attendeesMainTask;
     mapping(address => Attendee[]) private _attendeesSubTask;
-    mapping(address => uint256) balances;
-
-    mapping(address => uint) public taskCount;
-    mapping(address => uint) public lastTaskCreationTime;
 
     uint public TIME_LIMIT = 60;
 
