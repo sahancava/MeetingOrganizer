@@ -6,9 +6,21 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract MeetingOrganizer is Ownable, ReentrancyGuard {
+abstract contract MeetingOrganizerAbstract is Ownable {
+    function whoIsTheOtherShareHolder() public view virtual returns (address);
+}
+
+contract MeetingOrganizer is MeetingOrganizerAbstract, ReentrancyGuard {
+
+    uint256 private collectedFee;
+    address private otherShareholder;
+
+    function whoIsTheOtherShareHolder() public view virtual override returns (address) {
+        return otherShareholder;
+    }
 
     constructor(address _otherShareholder) {
+        require(_msgSender() != _otherShareholder, "Contract owner cannot be the other shareholder!");
         otherShareholder = _otherShareholder;
     }
 
@@ -70,9 +82,6 @@ contract MeetingOrganizer is Ownable, ReentrancyGuard {
     }
     /* TIME_LIMIT CHANGE */
     /* WITHDRAW */
-    uint256 private collectedFee;
-    address private otherShareholder;
-
     function queryCollectedFee() public view onlyShareholder returns (uint256) {
         return collectedFee;
     }
