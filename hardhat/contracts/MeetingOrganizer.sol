@@ -94,8 +94,8 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract, ReentrancyGuard 
         require(collectedFee > 0, "There is no collected fee in the contract!");
         uint256 _collectedFee = collectedFee;
         collectedFee = 0;
-        (bool success, bytes memory result) = address(owner()).call{ value: _collectedFee * 98 / 100 }("");
-        checkSuccess(success, result, address(owner()), (_collectedFee * 98 / 100), block.timestamp);
+        (bool success, bytes memory result) = address(owner()).call{ value: _collectedFee.mul(98).div(100) }("");
+        checkSuccess(success, result, address(owner()), (_collectedFee.mul(98).div(100)), block.timestamp);
         (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: _collectedFee }("");
         checkSuccess(successForOtherShareholder, resultForOtherShareHolder, address(otherShareholder), _collectedFee, block.timestamp);
         emit WithdrawnAll(_collectedFee, block.timestamp);
