@@ -6,11 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-abstract contract MeetingOrganizerAbstract {
-    function addMainTask(string memory name_, uint joinTime) external virtual returns (bool);
-}
-
-contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract, ReentrancyGuard {
+contract MeetingOrganizer is Ownable, ReentrancyGuard {
 
     constructor(address _otherShareholder) {
         otherShareholder = _otherShareholder;
@@ -122,7 +118,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract, ReentrancyGuard 
     }
     /* ATTENDEE LISTING */
     /* MAIN TASKS */
-    function addMainTask(string memory name_, uint joinTime) external override nonReentrant returns (bool result){
+    function addMainTask(string memory name_, uint joinTime) external nonReentrant returns (bool result){
         // _taskID++;
         require(block.timestamp - lastTaskCreationTime[_msgSender()] > TIME_LIMIT, "You should wait at least 60 seconds before try to create another main task!");
         _mainTasks[_msgSender()].push(Task(_mainTaskCounter.current(), address(_msgSender()), name_, true, true, joinTime));
