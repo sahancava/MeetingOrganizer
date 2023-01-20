@@ -4,12 +4,13 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 abstract contract MeetingOrganizerAbstract {
     function addMainTask(string memory name_, uint joinTime) external virtual returns (bool);
 }
 
-contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
+contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract, ReentrancyGuard {
 
     constructor(address _otherShareholder) {
         otherShareholder = _otherShareholder;
@@ -50,15 +51,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     uint public TIME_LIMIT = 60;
 
     /* EVENTS */
-    event MainTaskCreated(
-        uint id,
-        address owner,
-        string name,
-        bool isMainTask,
-        bool active,
-        uint joinTime
-    );
-
+    event MainTaskCreated(uint id, address owner, string name, bool isMainTask, bool active, uint joinTime);
     event Received(uint256 amount);
     event MainTaskDeactivated(uint id, uint256 timestamp);
     event AttendeeAddedToMainTask(uint taskID, address address_, uint256 attendeeAmount, bool active);
@@ -67,13 +60,6 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     event TimeLimitChanged(uint oldTimeLimit, uint newTimeLimit);
     /* EVENTS */
     /* MODIFIERS */
-    bool internal locked;
-    modifier lockCheck {
-        require(!locked, "No re-entrancy!");
-        locked = true;
-        _;
-        locked = false;
-    }
     modifier onlyShareholder {
         require(_msgSender() == owner() || _msgSender() == otherShareholder, "You are not a shareholder!");
         _;
@@ -105,15 +91,16 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
             }
         }
     }
-    function withdraw() public onlyShareholder lockCheck returns (uint256) {
+    function withdraw() public onlyShareholder nonReentrant returns (uint256) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
-        (bool success, bytes memory result) = address(owner()).call{ value: collectedFee * 98 / 100 }("");
-        checkSuccess(success, result, address(owner()), (collectedFee * 98 / 100), block.timestamp);
-        (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: collectedFee }("");
-        checkSuccess(successForOtherShareholder, resultForOtherShareHolder, address(otherShareholder), collectedFee, block.timestamp);
-        emit WithdrawnAll(collectedFee, block.timestamp);
+        uint256 _collectedFee = collectedFee;
         collectedFee = 0;
-        return collectedFee;
+        (bool success, bytes memory result) = address(owner()).call{ value: _collectedFee * 98 / 100 }("");
+        checkSuccess(success, result, address(owner()), (_collectedFee * 98 / 100), block.timestamp);
+        (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: _collectedFee }("");
+        checkSuccess(successForOtherShareholder, resultForOtherShareHolder, address(otherShareholder), _collectedFee, block.timestamp);
+        emit WithdrawnAll(_collectedFee, block.timestamp);
+        return _collectedFee;
     }
     /* WITHDRAW */
     /* CHANGE THE OTHERSHAREHOLDER */
@@ -136,7 +123,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     }
     /* ATTENDEE LISTING */
     /* MAIN TASKS */
-    function addMainTask(string memory name_, uint joinTime) external override lockCheck returns (bool result){
+    function addMainTask(string memory name_, uint joinTime) external override nonReentrant returns (bool result){
         // _taskID++;
         require(block.timestamp - lastTaskCreationTime[_msgSender()] > TIME_LIMIT, "You should wait at least 60 seconds before try to create another main task!");
         _mainTasks[_msgSender()].push(Task(_mainTaskCounter.current(), address(_msgSender()), name_, true, true, joinTime));
@@ -156,7 +143,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
     function getAmountOfMainTasks(address address_) public view returns (uint) {
         return _mainTasks[address_].length;
     }
-    function deactivateTheMainTask(uint mainTaskID) public lockCheck returns (bool) {
+    function deactivateTheMainTask(uint mainTaskID) public nonReentrant returns (bool) {
         Task storage _task = _mainTasks[_msgSender()][mainTaskID];
         require(_task.owner == _msgSender(), "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
@@ -164,7 +151,7 @@ contract MeetingOrganizer is Ownable, MeetingOrganizerAbstract {
         emit MainTaskDeactivated(mainTaskID, block.timestamp);
         return true;
     }
-    function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public lockCheck payable returns (bool) {
+    function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public nonReentrant payable returns (bool) {
         Task storage _task = _mainTasks[_msgSender()][mainTaskID];
         // below will be changed
         require(_task.owner != attendeeAddress, "Task owner cannot be a attendee at the same time!");
