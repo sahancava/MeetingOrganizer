@@ -7,13 +7,13 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 abstract contract MeetingOrganizerAbstract is Ownable {
+    address internal otherShareholder;
+    uint256 internal collectedFee;
     function whoIsTheOtherShareHolder() public view virtual returns (address);
+    function queryCollectedFee() public view virtual returns (uint256);
 }
 
 contract MeetingOrganizer is MeetingOrganizerAbstract, ReentrancyGuard {
-
-    uint256 private collectedFee;
-    address private otherShareholder;
 
     function whoIsTheOtherShareHolder() public view virtual override returns (address) {
         return otherShareholder;
@@ -82,7 +82,7 @@ contract MeetingOrganizer is MeetingOrganizerAbstract, ReentrancyGuard {
     }
     /* TIME_LIMIT CHANGE */
     /* WITHDRAW */
-    function queryCollectedFee() public view onlyShareholder returns (uint256) {
+    function queryCollectedFee() public view virtual override onlyShareholder returns (uint256) {
         return collectedFee;
     }
     function checkSuccess(bool success, bytes memory result, address _to, uint256 _amount, uint256 _timestamp) internal {
