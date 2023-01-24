@@ -61,6 +61,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     event WithdrawnAll(uint256 amount, uint256 time);
     event TransferFailed(address to, uint256 amount, uint256 timestamp);
     event TimeLimitChanged(uint oldTimeLimit, uint newTimeLimit);
+    event OtherShareHolderChanged(uint256 changeTime, address oldAddress, address newAddress);
     /* EVENTS */
     /* MODIFIERS */
     modifier onlyShareholder {
@@ -106,6 +107,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     /* CHANGE THE OTHERSHAREHOLDER */
     function changeOtherShareholder(address _otherShareholder) public returns (bool) {
         require(_msgSender() == otherShareholder, "You're not the shareholder!");
+        emit OtherShareHolderChanged(block.timestamp, otherShareholder, _otherShareholder);
         otherShareholder = _otherShareholder;
         return true;
     }
