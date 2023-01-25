@@ -150,7 +150,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         return _mainTasks[address_].length;
     }
     function deactivateTheMainTask(uint mainTaskID) public nonReentrant returns (bool) {
-        Task storage _task = _mainTasks[_msgSender()][mainTaskID];
+        Task memory _task = _mainTasks[_msgSender()][mainTaskID];
         require(_task.owner == _msgSender(), "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
         _task.active = false;
@@ -158,7 +158,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         return true;
     }
     function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public nonReentrant payable returns (bool) {
-        Task storage _task = _mainTasks[_msgSender()][mainTaskID];
+        Task memory _task = _mainTasks[_msgSender()][mainTaskID];
         // below will be changed
         require(_task.owner != attendeeAddress, "Task owner cannot be an attendee at the same time!");
         require(msg.value >= attendeeAmount.mul(110).div(100), "You don't have enough ETH!");
