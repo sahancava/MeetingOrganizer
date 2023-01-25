@@ -160,7 +160,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public nonReentrant payable returns (bool) {
         Task storage _task = _mainTasks[_msgSender()][mainTaskID];
         // below will be changed
-        require(_task.owner != attendeeAddress, "Task owner cannot be a attendee at the same time!");
+        require(_task.owner != attendeeAddress, "Task owner cannot be an attendee at the same time!");
         require(msg.value >= attendeeAmount.mul(110).div(100), "You don't have enough ETH!");
         require(_task.owner == _msgSender(), "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
