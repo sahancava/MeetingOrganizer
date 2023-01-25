@@ -95,9 +95,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     function withdraw() public onlyShareholder nonReentrant returns (uint256) {
         require(collectedFee > 0, "There is no collected fee in the contract!");
         uint256 _collectedFee = collectedFee;
-        unchecked {
-            collectedFee = 0;
-        }
+        collectedFee = 0;
         (bool success, bytes memory result) = address(owner()).call{ value: _collectedFee.mul(98).div(100) }("");
         checkSuccess(success, result, address(owner()), (_collectedFee.mul(98).div(100)), block.timestamp);
         (bool successForOtherShareholder, bytes memory resultForOtherShareHolder) = address(otherShareholder).call{ value: _collectedFee }("");
@@ -133,10 +131,12 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         _mainTasks[_msgSender()].push(Task(_mainTaskCounter.current(), address(_msgSender()), name_, true, true, joinTime));
         emit MainTaskCreated(_mainTaskCounter.current(), address(_msgSender()), name_, true, true, joinTime);
         _mainTaskCounter.increment();
+
         unchecked {
             taskCount[_msgSender()]++;
-            lastTaskCreationTime[_msgSender()] = block.timestamp;
         }
+
+        lastTaskCreationTime[_msgSender()] = block.timestamp;
         return true;
     }
     function getMainTasks(address address_) public view returns (Task[] memory) {
