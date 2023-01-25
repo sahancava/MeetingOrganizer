@@ -175,7 +175,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     /* MAIN TASKS */
     
     /* MAIN TASKS - TIME CHECKER */
-    function checkIfTimePassed(address address_, uint mainTaskID) public view returns (bool) {
+    function checkIfTimePassed(address address_, uint mainTaskID) internal view returns (bool hasTimePassed) {
         require(_mainTasks[address_].length > 0, "Does not exist!");
         return _mainTasks[address_][mainTaskID].joinTime < block.timestamp + 10 minutes;
     }
