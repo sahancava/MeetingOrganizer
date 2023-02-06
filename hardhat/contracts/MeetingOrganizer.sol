@@ -43,10 +43,10 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         uint joinTime;
     }
 
-    mapping(address => uint) public taskCount;
-    mapping(address => uint) public lastTaskCreationTime;
-    mapping(address => uint256) balances;
-    mapping(address => Task[]) private _mainTasks;
+    mapping(address _owner => uint _count) public taskCount;
+    mapping(address _owner => uint _timestamp) public lastTaskCreationTime;
+    mapping(address _owner => uint256 _amount) balances;
+    mapping(address _owner => Task[] _mainTask) private _mainTasks;
     mapping(uint => mapping(address => Task[])) private _subTasks;
     mapping(address => Attendee[]) private _attendeesMainTask;
     mapping(address => Attendee[]) private _attendeesSubTask;
