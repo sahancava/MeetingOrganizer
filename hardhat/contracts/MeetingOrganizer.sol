@@ -150,7 +150,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         return _mainTasks[address_].length;
     }
     function deactivateTheMainTask(uint mainTaskID) public nonReentrant returns (bool) {
-        Task memory _task = _mainTasks[_msgSender()][mainTaskID];
+        Task storage _task = _mainTasks[_msgSender()][mainTaskID];
         require(_task.owner == _msgSender(), "You are not the owner of the main task!");
         require(_task.active, "This main task is already deactivated!");
         _task.active = false;
