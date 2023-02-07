@@ -63,14 +63,11 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     event TimeLimitChanged(uint oldTimeLimit, uint newTimeLimit);
     event OtherShareHolderChanged(uint256 changeTime, address oldAddress, address newAddress);
     /* EVENTS */
-    /* MODIFIERS */
-    modifier onlyShareholder {
-        require(_msgSender() == owner() || _msgSender() == otherShareholder, "You are not a shareholder!");
-        _;
-    }
+    /* ERROR HANDLING */
     error CustomERROR_Not_A_Wallet_Address();
-    /* MODIFIERS */
-
+    error CustomERROR_Not_A_ShareHolder();
+    error CustomERROR_No_Collected_Fee();
+    /* ERROR HANDLING */
     /* TIME_LIMIT CHANGE */
     function changeTimeLimit(uint _newTimeLimit) public onlyOwner {
         require(_newTimeLimit >= 60 && _newTimeLimit <=600, "New TIME_LIMIT should be between (including) 60 and 600 seconds!");
@@ -80,7 +77,10 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     }
     /* TIME_LIMIT CHANGE */
     /* WITHDRAW */
-    function queryCollectedFee() public view onlyShareholder returns (uint256) {
+    function queryCollectedFee() public view returns (uint256) {
+        if (_msgSender() != owner() || _msgSender() != otherShareholder) {
+            revert CustomERROR_Not_A_ShareHolder();
+        }
         return collectedFee;
     }
     function checkSuccess(bool success, bytes memory result, address _to, uint256 _amount, uint256 _timestamp) internal {
@@ -93,8 +93,13 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
             }
         }
     }
-    function withdraw() public onlyShareholder nonReentrant returns (uint256) {
-        require(collectedFee > 0, "There is no collected fee in the contract!");
+    function withdraw() public nonReentrant returns (uint256) {
+        if (_msgSender() != owner() || _msgSender() != otherShareholder) {
+            revert CustomERROR_Not_A_ShareHolder();
+        }
+        if (!(collectedFee > 0)) {
+            revert CustomERROR_No_Collected_Fee();
+        }
         uint256 _collectedFee = collectedFee;
         collectedFee = 0;
         (bool success, bytes memory result) = address(owner()).call{ value: _collectedFee.mul(98).div(100) }("");
