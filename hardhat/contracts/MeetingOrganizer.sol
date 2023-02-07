@@ -68,12 +68,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         require(_msgSender() == owner() || _msgSender() == otherShareholder, "You are not a shareholder!");
         _;
     }
-    modifier onlyWallet(address walletAddress) {
-        uint len;
-        assembly { len := extcodesize(walletAddress) }
-        require(len == 0, "Wallet address cannot be a contract address!");
-        _;
-    }
+    error CustomERROR_Not_A_Wallet_Address();
     /* MODIFIERS */
 
     /* TIME_LIMIT CHANGE */
@@ -164,7 +159,12 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         return true;
     }
 
-    function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public nonReentrant onlyWallet(attendeeAddress) payable returns (bool) {
+    function addAttendeeToMainTask(uint mainTaskID, address attendeeAddress, uint256 attendeeAmount) public nonReentrant payable returns (bool) {
+        uint len;
+        assembly { len := extcodesize(attendeeAddress) }
+        if (len != 0) {
+            revert CustomERROR_Not_A_Wallet_Address();
+        }
         Task memory _task = _mainTasks[_msgSender()][mainTaskID];
         // below will be changed
         require(_task.owner != attendeeAddress, "Task owner cannot be an attendee at the same time!");
