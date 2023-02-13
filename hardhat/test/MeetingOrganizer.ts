@@ -18,7 +18,7 @@ describe('MeetingOrganizer Contract Deployment', function () {
     before(async () => {
         console.log('\n')
     })
-
+    
     describe('########## ---> Contract Ownership <--- ###################################', function () {
         
         // --> Below `after` can be commented.
