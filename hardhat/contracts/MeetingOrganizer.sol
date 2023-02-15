@@ -78,8 +78,8 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     /* TIME_LIMIT CHANGE */
     /* WITHDRAW */
     function queryCollectedFee() public view returns (uint256) {
-        if(_msgSender() != otherShareholder && _msgSender() != owner()) {
-            revert ('CustomERROR_Not_A_ShareHolder');
+        if (_msgSender() != otherShareholder && _msgSender() != owner()) {
+            revert CustomERROR_Not_A_ShareHolder();
         }
         return collectedFee;
     }
@@ -94,7 +94,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         }
     }
     function withdraw() public nonReentrant returns (uint256) {
-        if (_msgSender() != owner() || _msgSender() != otherShareholder) {
+        if (_msgSender() != owner() && _msgSender() != otherShareholder) {
             revert CustomERROR_Not_A_ShareHolder();
         }
         if (!(collectedFee > 0)) {
