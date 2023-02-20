@@ -11,6 +11,9 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     address private otherShareholder;
     uint256 private collectedFee;
 
+    /**
+     * @dev Returns the other shareholder address.
+     */
     function whoIsTheOtherShareHolder() public view returns (address) {
         return otherShareholder;
     }
@@ -63,12 +66,18 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
     event TimeLimitChanged(uint oldTimeLimit, uint newTimeLimit);
     event OtherShareHolderChanged(uint256 changeTime, address oldAddress, address newAddress);
     /* EVENTS */
+
     /* ERROR HANDLING */
     error CustomERROR_Not_A_Wallet_Address();
     error CustomERROR_Not_A_ShareHolder();
     error CustomERROR_No_Collected_Fee();
     /* ERROR HANDLING */
+
     /* TIME_LIMIT CHANGE */
+    /**
+     * 
+     * @param _newTimeLimit The new time limit in seconds
+     */
     function changeTimeLimit(uint _newTimeLimit) public onlyOwner {
         require(_newTimeLimit >= 60 && _newTimeLimit <=600, "New TIME_LIMIT should be between (including) 60 and 600 seconds!");
         uint oldTimeLimit = TIME_LIMIT;
@@ -76,13 +85,29 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
         emit TimeLimitChanged(oldTimeLimit, TIME_LIMIT);
     }
     /* TIME_LIMIT CHANGE */
+
     /* WITHDRAW */
+    
+    /**
+     * @dev Query the collected fee
+     * @return collectedFee The collected fee
+     * _msgSender() must be the owner or the other shareholder
+     */
     function queryCollectedFee() public view returns (uint256) {
         if (_msgSender() != otherShareholder && _msgSender() != owner()) {
             revert CustomERROR_Not_A_ShareHolder();
         }
         return collectedFee;
     }
+
+    /**
+     * Internal function to check if the transfer was successful
+     * @param success checks if the transfer was successful
+     * @param result the result of the transfer
+     * @param _to the address to which the transfer was made
+     * @param _amount the amount of the transfer
+     * @param _timestamp the timestamp of the transfer
+     */
     function checkSuccess(bool success, bytes memory result, address _to, uint256 _amount, uint256 _timestamp) internal {
         require(success, "Transfer failed!");
         if (!success) {
