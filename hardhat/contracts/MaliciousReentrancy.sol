@@ -9,7 +9,7 @@ contract MaliciousReentrancy {
     }
 
     function call() public payable {
-        for(uint i=0;i<5;i++) {
+        for(uint i=0; i<5; i++) {
             (bool success,) = target.call{value: address(this).balance}("");
             require(success, "transfer failed");
         }
