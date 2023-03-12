@@ -108,6 +108,7 @@ contract MeetingOrganizer is ReentrancyGuard, Ownable {
      * @param _amount the amount of the transfer
      * @param _timestamp the timestamp of the transfer
      */
+    // below if statement will be fixed in the next version
     function checkSuccess(bool success, bytes memory result, address _to, uint256 _amount, uint256 _timestamp) internal {
         require(success, "Transfer failed!");
         if (!success) {
